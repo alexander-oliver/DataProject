@@ -11,11 +11,11 @@ class Labeler:
             results = self.service.users().labels().list(userId='me').execute()
             return results.get('labels',[])
 
-    def setLabel(self, message, label, rm=False):
+    def setLabel(self, message, labelIds, rm=False):
         if not rm:
-            body = { "addLabelIds": [label['id']]}
+            body = { "addLabelIds": labelIds}
         else:
-            body = {"removeLabelIds" : [label['id']]}
+            body = {"removeLabelIds" : labelIds}
         message = self.service.users().messages().modify(userId='me', id=message['id'], body=body).execute()
         return message
 
@@ -24,7 +24,6 @@ class Labeler:
                 'name':labelName,
                 'labelListVisibility': 'labelShow'}
         label = self.service.users().labels().create(userId='me', body=label).execute()
-        print(label)
         return label
 
     def listMessagesWithLabels(self, label_ids):
@@ -42,3 +41,8 @@ class Labeler:
           messages.extend(response['messages'])
 
         return messages
+
+    def clearLabel(self, match, labelIds):
+        messages = self.listMessagesWithLabels(match)
+        for m in messages:
+            self.setLabel(m,labelIds,rm=True)

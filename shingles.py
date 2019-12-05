@@ -4,6 +4,9 @@ def shingles(k, s):
 def JaccardSim(x,y):
     return len(x.intersection(y))/len(x.union(y))
 
+def QuickSim(sample, hash):
+    return len(sample.intersection(hash))/len(hash)
+
 def addShingleCount(s, counts={}):
     for x in s:
         if x in counts:
@@ -11,13 +14,3 @@ def addShingleCount(s, counts={}):
         else:
             counts[x] = 1
     return counts
-
-def similarity(shin, count):
-    i = 0
-    for x in shin:
-        if x in count:
-            i += count[x]
-    j = 0
-    for x in count:
-        j += count[x]
-    return i/j
