@@ -53,13 +53,13 @@ class Messenger:
                 part = parts[i]
                 body = part['body']
                 if 'data' in body:
-                    out += '\n\n\n\n'
+                    out += '\n'
                     out += base64.urlsafe_b64decode(body['data']).decode('utf-8')
                 if 'parts' in part:
                     for i in range(len(part['parts'])):
                         b = part['parts'][i]['body']
                         if 'data' in b:
-                            out += '\n\n\n\n'
+                            out += '\n'
                             out += base64.urlsafe_b64decode(b['data']).decode('utf-8')
         else:
             body = message['payload']['body']

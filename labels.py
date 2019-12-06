@@ -1,9 +1,9 @@
 class Labeler:
     def __init__(self, service):
         self.service = service
+        self.label_id = self.callLabelIds()
 
-    # Returns a list of all labels if a message is not given
-    def getLabels(self, message=None):
+    def getLabelObjects(self, message=None):
         if message:
             message = self.service.users().messages().get(userId='me', id=message['id']).execute()
             return message['labelIds']
@@ -11,11 +11,9 @@ class Labeler:
             results = self.service.users().labels().list(userId='me').execute()
             return results.get('labels',[])
 
-    def setLabel(self, message, labelIds, rm=False):
-        if not rm:
-            body = { "addLabelIds": labelIds}
-        else:
-            body = {"removeLabelIds" : labelIds}
+    def setLabel(self, message, addLabelNames, rmLabelNames = []):
+        body = { "addLabelIds": self.labelIds(addLabelNames),
+                 "removeLabelIds" : self.labelIds(rmLabelNames)}
         message = self.service.users().messages().modify(userId='me', id=message['id'], body=body).execute()
         return message
 
@@ -26,9 +24,31 @@ class Labeler:
         label = self.service.users().labels().create(userId='me', body=label).execute()
         return label
 
-    def listMessagesWithLabels(self, label_ids):
+    def callLabelIds(self):
+        labels = self.getLabelObjects()
+        ids = {}
+        for label in labels:
+            ids[label['name']] = label['id']
+        return ids
+
+    def names(self): return list(self.label_id.keys())
+
+    def labelId(self, labelName):
+        if labelName in self.label_id:
+            return self.label_id[labelName]
+        else:
+            raise NameError(f'Label Name {labelName} does not exist.')
+
+    def labelIds(self, labelNames): return [self.labelId(x) for x in labelNames]
+
+    def match(self, labelNames):
+        try:
+            labelIds = self.labelIds(labelNames)
+        except:
+            self.label_id = self.callLabelIds()
+            labelIds = self.labelIds(labelNames)
         response = self.service.users().messages().list(userId='me',
-                                               labelIds=label_ids).execute()
+                                               labelIds=labelIds).execute()
         messages = []
         if 'messages' in response:
           messages.extend(response['messages'])
@@ -36,7 +56,7 @@ class Labeler:
         while 'nextPageToken' in response:
           page_token = response['nextPageToken']
           response = self.service.users().messages().list(userId='me',
-                                                     labelIds=label_ids,
+                                                     labelIds=labelIds,
                                                      pageToken=page_token).execute()
           messages.extend(response['messages'])
 
