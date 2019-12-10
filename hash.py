@@ -1,5 +1,7 @@
-from shingles import *
 import random
+
+def shingles(k, s):
+    return set([s[i:i+k] for i in range(len(s)-k)])
 
 class Hasher:
     def __init__(self, k):
@@ -32,4 +34,8 @@ class Hasher:
 
     def sim(self, message):
         s = shingles(self.k, message)
-        return QuickSim(s,self())
+        i = 0
+        for x in s:
+            if x in self.count:
+                i += 1
+        return i/len(self.count)

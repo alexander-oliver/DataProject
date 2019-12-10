@@ -10,11 +10,13 @@ class Gmail:
         self.labels = Labeler(self.service)
         self.messages = Messenger(self.service)
 
-    def hashMatch(self, labelNames, freq=.5, k=8):
-        labelIds = G.labels.labelIds(labelNames)
-        messages = self.labels.match(LabelIds)
-        if len(messages) > 50:
-            messages = random.sample(messages, 50)
+    def hashMatch(self, labelNames, freq=.5, k=8, sample=50):
+        messages = self.labels.match(labelNames)
+        if sample and sample < len(messages):
+            print(f'sampling {sample} messages of {len(messages)} matching {labelNames}')
+            messages = random.sample(messages, sample)
+        else:
+            print(f'sampling {len(messages)} messages matching {labelNames}')
         return self.getHash(messages, freq=freq, k=k)
 
     def getHash(self, messages, freq=0.5, k=8):

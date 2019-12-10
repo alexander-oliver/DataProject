@@ -62,7 +62,7 @@ class Labeler:
 
         return messages
 
-    def clearLabel(self, match, labelIds):
-        messages = self.listMessagesWithLabels(match)
+    def clearLabel(self, match, rmLabelNames, addLabelNames=None):
+        messages = self.match(match)
         for m in messages:
-            self.setLabel(m,labelIds,rm=True)
+            self.setLabel(m,addLabelNames,rmLabelNames)
