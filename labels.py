@@ -3,10 +3,10 @@ class Labeler:
         self.service = service
         self.label_id = self.callLabelIds()
 
-    def getLabelObjects(self, message=None):
+    def getLabel(self, message=None):
         if message:
             message = self.service.users().messages().get(userId='me', id=message['id']).execute()
-            return message['labelIds']
+            return self.labelNames(message['labelIds'])
         else:
             results = self.service.users().labels().list(userId='me').execute()
             return results.get('labels',[])
@@ -25,7 +25,7 @@ class Labeler:
         return label
 
     def callLabelIds(self):
-        labels = self.getLabelObjects()
+        labels = self.getLabel()
         ids = {}
         for label in labels:
             ids[label['name']] = label['id']
@@ -40,6 +40,14 @@ class Labeler:
             raise NameError(f'Label Name {labelName} does not exist.')
 
     def labelIds(self, labelNames): return [self.labelId(x) for x in labelNames]
+
+    def labelName(self, labelId):
+        for labelName in self.label_id:
+            if self.label_id[labelName] == labelId:
+                return labelName
+        raise NameError(f'Label Id {labelId} does not exist')
+
+    def labelNames(self, labelIds): return [self.labelName(x) for x in labelIds]
 
     def match(self, labelNames):
         try:
@@ -58,7 +66,8 @@ class Labeler:
           response = self.service.users().messages().list(userId='me',
                                                      labelIds=labelIds,
                                                      pageToken=page_token).execute()
-          messages.extend(response['messages'])
+          if 'messages' in response:
+            messages.extend(response['messages'])
 
         return messages
 
